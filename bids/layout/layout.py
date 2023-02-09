@@ -18,7 +18,7 @@ from ..exceptions import (
 )
 
 from ancpbids import CustomOpExpr, EntityExpr, AllExpr, ValidationPlugin, load_dataset, validate_dataset, \
-    write_derivative
+    write_derivative, DatasetOptions
 from ancpbids.query import query, query_entities, FnMatchExpr, AnyExpr
 from ancpbids.utils import deepupdate, resolve_segments, convert_to_relative, parse_bids_name
 
@@ -264,11 +264,18 @@ class BIDSLayout(BIDSLayoutMRIMixin, BIDSLayoutWritingMixin, BIDSLayoutVariables
         database_path: Optional[str]=None,
         reset_database: Optional[bool]=None,
         indexer: Optional[Callable]=None,
+        ignore: Optional[List[str]]=None,
         **kwargs,
     ):
         if isinstance(root, Path):
             root = root.absolute()
-        self.dataset = load_dataset(root)
+
+        if ignore is None:
+            ignore = ["code", "stimuli", "sourcedata", "models"]
+
+        options = DatasetOptions(ignore=ignore)
+        
+        self.dataset = load_dataset(root, options=options)
         self.schema = self.dataset.get_schema()
         self.validationReport = None
 
